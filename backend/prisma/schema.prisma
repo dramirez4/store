@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   // e.g., 'admin', 'worker', 'sales'
+  orders    Order[]
+  workerLogs WorkerLog[]
+}
+
+model InventoryItem {
+  id         Int     @id @default(autoincrement())
+  name       String
+  model      String
+  size       String
+  stockLevel Int
+  orders     Order[]
+}
+
+model Order {
+  id             Int      @id @default(autoincrement())
+  customerName   String
+  status         String   // e.g., 'pending', 'completed', 'shipped'
+  paymentStatus  String   // e.g., 'paid', 'unpaid', 'refunded'
+  userId         Int?
+  user           User?    @relation(fields: [userId], references: [id])
+  inventoryItemId Int?
+  inventoryItem  InventoryItem? @relation(fields: [inventoryItemId], references: [id])
+  payments       Payment[]
+  workerLogs     WorkerLog[]
+  createdAt      DateTime @default(now())
+}
+
+model Payment {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id])
+  amount    Float
+  status    String   // e.g., 'pending', 'completed', 'failed'
+  createdAt DateTime @default(now())
+}
+
+model WorkerLog {
+  id        Int      @id @default(autoincrement())
+  workerId  Int
+  worker    User     @relation(fields: [workerId], references: [id])
+  orderId   Int
+  order     Order    @relation(fields: [orderId], references: [id])
+  action    String   // e.g., 'completed', 'scanned'
+  timestamp DateTime @default(now())
+}

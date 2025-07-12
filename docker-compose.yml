@@ -16,9 +16,10 @@ services:
   backend:
     build: ./backend
     environment:
-      DATABASE_URL: postgres://postgres:postgres@postgres:5432/shoeco
+      DATABASE_URL: "postgres://postgres:postgres@postgres:5432/shoeco"
     ports:
       - "3001:3001"
+      - "5555:5555"
     depends_on:
       - postgres
     volumes:
