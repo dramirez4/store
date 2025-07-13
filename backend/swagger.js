@@ -25,6 +25,35 @@ const options = {
           scheme: 'bearer',
           bearerFormat: 'JWT'
         }
+      },
+      schemas: {
+        InventoryItem: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'integer',
+              description: 'Unique identifier for the inventory item'
+            },
+            name: {
+              type: 'string',
+              description: 'Name of the inventory item'
+            },
+            model: {
+              type: 'string',
+              description: 'Model number or identifier'
+            },
+            size: {
+              type: 'string',
+              description: 'Size of the item'
+            },
+            stockLevel: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Current stock level'
+            }
+          },
+          required: ['name', 'model', 'size', 'stockLevel']
+        }
       }
     },
     security: [

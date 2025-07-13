@@ -7,6 +7,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpecs = require('./swagger');
 const authRoutes = require('./routes/auth');
 const protectedRoutes = require('./routes/protected');
+const inventoryRoutes = require('./routes/inventory');
 
 const app = express();
 const prisma = new PrismaClient();
@@ -33,6 +34,7 @@ app.use((req, res, next) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/protected', protectedRoutes);
+app.use('/api/inventory', inventoryRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
