@@ -1,7 +1,14 @@
 const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
+  // Hash passwords
+  const saltRounds = 10;
+  const adminPassword = await bcrypt.hash('adminpass', saltRounds);
+  const workerPassword = await bcrypt.hash('workerpass', saltRounds);
+  const salesPassword = await bcrypt.hash('salespass', saltRounds);
+
   // Create users
   const admin = await prisma.user.upsert({
     where: { email: 'admin@example.com' },
@@ -9,7 +16,7 @@ async function main() {
     create: {
       name: 'Admin User',
       email: 'admin@example.com',
-      password: 'adminpass', // In production, use hashed passwords!
+      password: adminPassword,
       role: 'admin',
     },
   });
@@ -19,7 +26,7 @@ async function main() {
     create: {
       name: 'Worker User',
       email: 'worker@example.com',
-      password: 'workerpass',
+      password: workerPassword,
       role: 'worker',
     },
   });
@@ -29,7 +36,7 @@ async function main() {
     create: {
       name: 'Sales User',
       email: 'sales@example.com',
-      password: 'salespass',
+      password: salesPassword,
       role: 'sales',
     },
   });
