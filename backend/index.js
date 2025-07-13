@@ -8,6 +8,7 @@ const swaggerSpecs = require('./swagger');
 const authRoutes = require('./routes/auth');
 const protectedRoutes = require('./routes/protected');
 const inventoryRoutes = require('./routes/inventory');
+const salesRoutes = require('./routes/sales');
 
 const app = express();
 const prisma = new PrismaClient();
@@ -35,6 +36,7 @@ app.use((req, res, next) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/protected', protectedRoutes);
 app.use('/api/inventory', inventoryRoutes);
+app.use('/api/sales', salesRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
