@@ -151,9 +151,8 @@ function ConfirmDeleteModal({ open, onClose, onDelete, lang }) {
   );
 }
 
-export default function InventoryPage() {
+export default function InventoryPage({ lang }) {
   const [inventory, setInventory] = useState([]);
-  const [lang, setLang] = useState('en');
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
@@ -176,10 +175,6 @@ export default function InventoryPage() {
   useEffect(() => {
     fetchInventory();
   }, []);
-
-  const handleLangToggle = () => {
-    setLang((prev) => (prev === 'en' ? 'es' : 'en'));
-  };
 
   const handleEdit = (item) => {
     setEditItem(item);
@@ -213,9 +208,6 @@ export default function InventoryPage() {
     <div className="inventory-page" style={{ maxWidth: 700, margin: '0 auto', padding: 24 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ fontSize: 32 }}>{t('inventory', lang)}</h1>
-        <button onClick={handleLangToggle} style={{ fontSize: 18, padding: '8px 16px' }}>
-          {lang === 'en' ? 'Español' : 'English'}
-        </button>
       </div>
       <button onClick={() => setShowAdd(true)} style={{ fontSize: 20, padding: '12px 24px', marginBottom: 16, background: '#1976d2', color: 'white', border: 'none', borderRadius: 6 }}>
         + {t('addItem', lang)}

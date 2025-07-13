@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { t } from './i18n';
+// import { t } from './i18n';
 
 const API_URL = 'http://localhost:3001/api/auth/login';
 
@@ -37,7 +37,13 @@ export default function LoginPage({ onLogin, lang, setLang }) {
   };
 
   return (
-    <div style={{ maxWidth: 400, margin: '80px auto', padding: 24, background: 'white', borderRadius: 8, boxShadow: '0 2px 12px #0002' }}>
+    <div style={{ maxWidth: 400, margin: '80px auto', padding: 24, background: 'white', borderRadius: 8, boxShadow: '0 2px 12px #0002', position: 'relative' }}>
+      <button
+        onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
+        style={{ position: 'absolute', top: 16, right: 16, fontSize: 16, padding: '6px 14px', borderRadius: 6, border: 'none', background: '#eee', cursor: 'pointer' }}
+      >
+        {lang === 'en' ? 'Español' : 'English'}
+      </button>
       <h2 style={{ fontSize: 28, marginBottom: 24 }}>{lang === 'en' ? 'Login' : 'Iniciar sesión'}</h2>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <input
@@ -61,9 +67,6 @@ export default function LoginPage({ onLogin, lang, setLang }) {
           {loading ? (lang === 'en' ? 'Logging in...' : 'Iniciando...') : (lang === 'en' ? 'Login' : 'Entrar')}
         </button>
       </form>
-      <button onClick={() => setLang(lang === 'en' ? 'es' : 'en')} style={{ marginTop: 16, fontSize: 16, padding: '6px 12px' }}>
-        {lang === 'en' ? 'Español' : 'English'}
-      </button>
     </div>
   );
 } 
