@@ -45,6 +45,46 @@ router.get('/', authenticateToken, requireWorker, async (req, res) => {
 
 /**
  * @swagger
+ * /api/inventory/low-stock:
+ *   get:
+ *     summary: Get all inventory items with low stock (less than 10 units)
+ *     tags: [Inventory]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of low-stock inventory items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 lowStock:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/InventoryItem'
+ *       401:
+ *         description: Access token required
+ *       403:
+ *         description: Unauthorized access
+ */
+router.get('/low-stock', authenticateToken, requireWorker, async (req, res) => {
+  try {
+    console.log('GET /api/inventory/low-stock called');
+    const lowStock = await prisma.inventoryItem.findMany({
+      where: { stockLevel: { lt: 10 } },
+      orderBy: { stockLevel: 'asc' }
+    });
+    console.log('Low stock items:', lowStock);
+    res.json({ lowStock });
+  } catch (error) {
+    console.error('Get low-stock inventory error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
+ * @swagger
  * /api/inventory/{id}:
  *   get:
  *     summary: Get inventory item by ID
@@ -75,8 +115,12 @@ router.get('/', authenticateToken, requireWorker, async (req, res) => {
 router.get('/:id', authenticateToken, requireWorker, async (req, res) => {
   try {
     const { id } = req.params;
+    const parsedId = parseInt(id);
+    if (isNaN(parsedId)) {
+      return res.status(400).json({ error: 'Invalid or missing inventory item ID' });
+    }
     const item = await prisma.inventoryItem.findUnique({
-      where: { id: parseInt(id) }
+      where: { id: parsedId }
     });
 
     if (!item) {
