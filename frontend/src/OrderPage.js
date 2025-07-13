@@ -115,48 +115,58 @@ export default function OrderPage({ lang, setLang }) {
 
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 24 }}>
+      {/* Responsive and focus styles */}
+      <style>{`
+        @media (max-width: 600px) {
+          .orders-table-wrapper { overflow-x: auto; }
+          .orders-table { min-width: 600px; }
+        }
+        button:focus { outline: 3px solid #1976d2 !important; box-shadow: 0 0 0 2px #90caf9; }
+      `}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ fontSize: 32 }}>{lang === 'en' ? 'Orders' : 'Pedidos'}</h1>
       </div>
-      <button onClick={() => setShowAdd(true)} style={{ fontSize: 20, padding: '12px 24px', marginBottom: 16, background: '#1976d2', color: 'white', border: 'none', borderRadius: 6 }}>
+      <button onClick={() => setShowAdd(true)} style={{ fontSize: 20, padding: '12px 24px', marginBottom: 16, background: '#1976d2', color: 'white', border: 'none', borderRadius: 6, minWidth: 120 }}>
         + {lang === 'en' ? 'Add Order' : 'Agregar Pedido'}
       </button>
       <AddOrderModal open={showAdd} onClose={() => setShowAdd(false)} onAdd={fetchOrders} lang={lang} inventory={inventory} />
       {loading ? (
         <div style={{ fontSize: 20 }}>{lang === 'en' ? 'Loading...' : 'Cargando...'}</div>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 20 }}>
-          <thead>
-            <tr style={{ background: '#f0f0f0' }}>
-              <th style={{ padding: 12 }}>{lang === 'en' ? 'Customer' : 'Cliente'}</th>
-              <th style={{ padding: 12 }}>{lang === 'en' ? 'Item' : 'Artículo'}</th>
-              <th style={{ padding: 12 }}>{lang === 'en' ? 'Status' : 'Estado'}</th>
-              <th style={{ padding: 12 }}>{lang === 'en' ? 'Payment' : 'Pago'}</th>
-              <th style={{ padding: 12 }}>{lang === 'en' ? 'Actions' : 'Acciones'}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders.map((order) => (
-              <tr key={order.id} style={{ background: order.paymentStatus !== 'paid' ? '#ffeaea' : 'white' }}>
-                <td style={{ padding: 12 }}>{order.customerName}</td>
-                <td style={{ padding: 12 }}>{order.inventoryItem?.name || ''}</td>
-                <td style={{ padding: 12 }}>{order.status}</td>
-                <td style={{ padding: 12 }}>
-                  {order.paymentStatus === 'paid'
-                    ? (lang === 'en' ? 'Paid' : 'Pagado')
-                    : (lang === 'en' ? 'Unpaid' : 'No Pagado')}
-                </td>
-                <td style={{ padding: 12 }}>
-                  {order.paymentStatus !== 'paid' && (
-                    <button onClick={() => markAsPaid(order.id)} style={{ fontSize: 18, padding: '6px 14px', background: '#43a047', color: 'white', border: 'none', borderRadius: 4 }}>
-                      {lang === 'en' ? 'Mark as Paid' : 'Marcar como Pagado'}
-                    </button>
-                  )}
-                </td>
+        <div className="orders-table-wrapper" style={{ width: '100%', overflowX: 'auto' }}>
+          <table className="orders-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 20 }}>
+            <thead>
+              <tr style={{ background: '#f0f0f0' }}>
+                <th style={{ padding: 12 }}>{lang === 'en' ? 'Customer' : 'Cliente'}</th>
+                <th style={{ padding: 12 }}>{lang === 'en' ? 'Item' : 'Artículo'}</th>
+                <th style={{ padding: 12 }}>{lang === 'en' ? 'Status' : 'Estado'}</th>
+                <th style={{ padding: 12 }}>{lang === 'en' ? 'Payment' : 'Pago'}</th>
+                <th style={{ padding: 12 }}>{lang === 'en' ? 'Actions' : 'Acciones'}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {orders.map((order) => (
+                <tr key={order.id} style={{ background: order.paymentStatus !== 'paid' ? '#ffeaea' : 'white' }}>
+                  <td style={{ padding: 12 }}>{order.customerName}</td>
+                  <td style={{ padding: 12 }}>{order.inventoryItem?.name || ''}</td>
+                  <td style={{ padding: 12 }}>{order.status}</td>
+                  <td style={{ padding: 12 }}>
+                    {order.paymentStatus === 'paid'
+                      ? (lang === 'en' ? 'Paid' : 'Pagado')
+                      : (lang === 'en' ? 'Unpaid' : 'No Pagado')}
+                  </td>
+                  <td style={{ padding: 12, display: 'flex', gap: 12 }}>
+                    {order.paymentStatus !== 'paid' && (
+                      <button onClick={() => markAsPaid(order.id)} style={{ fontSize: 18, padding: '10px 18px', background: '#43a047', color: 'white', fontWeight: 'bold', border: 'none', borderRadius: 4, minWidth: 120 }}>
+                        {lang === 'en' ? 'Mark as Paid' : 'Marcar como Pagado'}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

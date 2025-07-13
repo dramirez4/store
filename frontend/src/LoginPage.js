@@ -38,9 +38,18 @@ export default function LoginPage({ onLogin, lang, setLang }) {
 
   return (
     <div style={{ maxWidth: 400, margin: '80px auto', padding: 24, background: 'white', borderRadius: 8, boxShadow: '0 2px 12px #0002', position: 'relative' }}>
+      {/* Responsive and focus styles */}
+      <style>{`
+        @media (max-width: 500px) {
+          .login-form-input, .login-form-button { font-size: 18px !important; padding: 12px !important; }
+          .login-translate-btn { top: 8px !important; right: 8px !important; font-size: 15px !important; padding: 8px 12px !important; }
+        }
+        input:focus, button:focus { outline: 3px solid #1976d2 !important; box-shadow: 0 0 0 2px #90caf9; }
+      `}</style>
       <button
         onClick={() => setLang(lang === 'en' ? 'es' : 'en')}
-        style={{ position: 'absolute', top: 16, right: 16, fontSize: 16, padding: '6px 14px', borderRadius: 6, border: 'none', background: '#eee', cursor: 'pointer' }}
+        className="login-translate-btn"
+        style={{ position: 'absolute', top: 16, right: 16, fontSize: 16, padding: '10px 18px', borderRadius: 6, border: 'none', background: '#eee', cursor: 'pointer', minWidth: 90 }}
       >
         {lang === 'en' ? 'Español' : 'English'}
       </button>
@@ -52,7 +61,8 @@ export default function LoginPage({ onLogin, lang, setLang }) {
           placeholder={lang === 'en' ? 'Email' : 'Correo electrónico'}
           value={form.email}
           onChange={handleChange}
-          style={{ fontSize: 18, padding: 8 }}
+          className="login-form-input"
+          style={{ fontSize: 20, padding: 12, borderRadius: 6, border: '1px solid #ccc' }}
         />
         <input
           name="password"
@@ -60,10 +70,11 @@ export default function LoginPage({ onLogin, lang, setLang }) {
           placeholder={lang === 'en' ? 'Password' : 'Contraseña'}
           value={form.password}
           onChange={handleChange}
-          style={{ fontSize: 18, padding: 8 }}
+          className="login-form-input"
+          style={{ fontSize: 20, padding: 12, borderRadius: 6, border: '1px solid #ccc' }}
         />
         {error && <div style={{ color: 'red', fontSize: 16 }}>{error}</div>}
-        <button type="submit" disabled={loading} style={{ fontSize: 20, padding: '10px 0', background: '#1976d2', color: 'white', border: 'none', borderRadius: 6 }}>
+        <button type="submit" disabled={loading} className="login-form-button" style={{ fontSize: 22, padding: '14px 0', background: '#1976d2', color: 'white', border: 'none', borderRadius: 6, minWidth: 120 }}>
           {loading ? (lang === 'en' ? 'Logging in...' : 'Iniciando...') : (lang === 'en' ? 'Login' : 'Entrar')}
         </button>
       </form>

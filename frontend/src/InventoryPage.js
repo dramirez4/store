@@ -206,10 +206,18 @@ export default function InventoryPage({ lang }) {
 
   return (
     <div className="inventory-page" style={{ maxWidth: 700, margin: '0 auto', padding: 24 }}>
+      {/* Responsive and focus styles */}
+      <style>{`
+        @media (max-width: 600px) {
+          .inventory-table-wrapper { overflow-x: auto; }
+          .inventory-table { min-width: 600px; }
+        }
+        button:focus { outline: 3px solid #1976d2 !important; box-shadow: 0 0 0 2px #90caf9; }
+      `}</style>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <h1 style={{ fontSize: 32 }}>{t('inventory', lang)}</h1>
       </div>
-      <button onClick={() => setShowAdd(true)} style={{ fontSize: 20, padding: '12px 24px', marginBottom: 16, background: '#1976d2', color: 'white', border: 'none', borderRadius: 6 }}>
+      <button onClick={() => setShowAdd(true)} style={{ fontSize: 20, padding: '12px 24px', marginBottom: 16, background: '#1976d2', color: 'white', border: 'none', borderRadius: 6, minWidth: 120 }}>
         + {t('addItem', lang)}
       </button>
       <AddItemModal open={showAdd} onClose={() => setShowAdd(false)} onAdd={fetchInventory} lang={lang} />
@@ -218,42 +226,44 @@ export default function InventoryPage({ lang }) {
       {loading ? (
         <div style={{ fontSize: 20 }}>{lang === 'en' ? 'Loading...' : 'Cargando...'}</div>
       ) : (
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 20 }}>
-          <thead>
-            <tr style={{ background: '#f0f0f0' }}>
-              <th style={{ padding: 12 }}>{t('name', lang)}</th>
-              <th style={{ padding: 12 }}>{t('model', lang)}</th>
-              <th style={{ padding: 12 }}>{t('size', lang)}</th>
-              <th style={{ padding: 12 }}>{t('stockLevel', lang)}</th>
-              <th style={{ padding: 12 }}>{t('actions', lang)}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inventory.map((item) => (
-              <tr key={item.id} style={{ background: item.stockLevel < 10 ? '#ffeaea' : 'white' }}>
-                <td style={{ padding: 12 }}>{item.name}</td>
-                <td style={{ padding: 12 }}>{item.model}</td>
-                <td style={{ padding: 12 }}>{item.size}</td>
-                <td style={{ padding: 12 }}>
-                  {item.stockLevel}
-                  {item.stockLevel < 10 && (
-                    <span style={{ color: 'red', fontWeight: 'bold', marginLeft: 8 }}>
-                      {t('lowStockWarning', lang)}
-                    </span>
-                  )}
-                </td>
-                <td style={{ padding: 12 }}>
-                  <button onClick={() => handleEdit(item)} style={{ fontSize: 18, marginRight: 8, padding: '6px 14px', background: '#ffc107', border: 'none', borderRadius: 4 }}>
-                    {t('edit', lang)}
-                  </button>
-                  <button onClick={() => handleDelete(item)} style={{ fontSize: 18, padding: '6px 14px', background: '#e53935', color: 'white', border: 'none', borderRadius: 4 }}>
-                    {t('delete', lang)}
-                  </button>
-                </td>
+        <div className="inventory-table-wrapper" style={{ width: '100%', overflowX: 'auto' }}>
+          <table className="inventory-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: 20 }}>
+            <thead>
+              <tr style={{ background: '#f0f0f0' }}>
+                <th style={{ padding: 12 }}>{t('name', lang)}</th>
+                <th style={{ padding: 12 }}>{t('model', lang)}</th>
+                <th style={{ padding: 12 }}>{t('size', lang)}</th>
+                <th style={{ padding: 12 }}>{t('stockLevel', lang)}</th>
+                <th style={{ padding: 12 }}>{t('actions', lang)}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {inventory.map((item) => (
+                <tr key={item.id} style={{ background: item.stockLevel < 10 ? '#ffeaea' : 'white' }}>
+                  <td style={{ padding: 12 }}>{item.name}</td>
+                  <td style={{ padding: 12 }}>{item.model}</td>
+                  <td style={{ padding: 12 }}>{item.size}</td>
+                  <td style={{ padding: 12 }}>
+                    {item.stockLevel}
+                    {item.stockLevel < 10 && (
+                      <span style={{ color: 'red', fontWeight: 'bold', marginLeft: 8 }}>
+                        {t('lowStockWarning', lang)}
+                      </span>
+                    )}
+                  </td>
+                  <td style={{ padding: 12, display: 'flex', gap: 12 }}>
+                    <button onClick={() => handleEdit(item)} style={{ fontSize: 18, marginRight: 0, padding: '10px 18px', background: '#ffc107', color: '#222', fontWeight: 'bold', border: 'none', borderRadius: 4, minWidth: 90 }}>
+                      {t('edit', lang)}
+                    </button>
+                    <button onClick={() => handleDelete(item)} style={{ fontSize: 18, padding: '10px 18px', background: '#e53935', color: 'white', border: 'none', borderRadius: 4, minWidth: 90 }}>
+                      {t('delete', lang)}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
