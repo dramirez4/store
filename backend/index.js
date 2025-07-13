@@ -9,6 +9,11 @@ const authRoutes = require('./routes/auth');
 const protectedRoutes = require('./routes/protected');
 const inventoryRoutes = require('./routes/inventory');
 const salesRoutes = require('./routes/sales');
+const roleRoutes = require('./routes/roles');
+const workerRoutes = require('./routes/workers');
+const batchRoutes = require('./routes/batches');
+const workerLogRoutes = require('./routes/worker-logs');
+const qrRoutes = require('./routes/qr');
 
 const app = express();
 const prisma = new PrismaClient();
@@ -37,16 +42,23 @@ app.use('/api/auth', authRoutes);
 app.use('/api/protected', protectedRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/sales', salesRoutes);
+app.use('/api/roles', roleRoutes);
+app.use('/api/workers', workerRoutes);
+app.use('/api/batches', batchRoutes);
+app.use('/api/worker-logs', workerLogRoutes);
+app.use('/api/qr', qrRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
   res.send('Hello World from Express backend!');
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`API Documentation available at: http://localhost:${PORT}/api-docs`);
-});
+// Start server only if run directly
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+    console.log(`API Documentation available at: http://localhost:${PORT}/api-docs`);
+  });
+}
 
-module.exports = { app, prisma, JWT_SECRET };
+module.exports = app;

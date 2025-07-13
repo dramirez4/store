@@ -7,12 +7,20 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Role {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+  workerLogs WorkerLog[]
+}
+
 model User {
   id         Int         @id @default(autoincrement())
   name       String
   email      String      @unique
   password   String
-  role       String
+  roleId     Int?
+  role       Role?       @relation(fields: [roleId], references: [id])
   orders     Order[]
   workerLogs WorkerLog[]
 }
@@ -49,12 +57,24 @@ model Payment {
   order     Order    @relation(fields: [orderId], references: [id])
 }
 
+model Batch {
+  id        Int      @id @default(autoincrement())
+  type      String   // e.g., 'sole', 'assembly', etc.
+  createdAt DateTime @default(now())
+  // Add more fields as needed (e.g., description, quantity, etc.)
+  workerLogs WorkerLog[]
+}
+
 model WorkerLog {
   id        Int      @id @default(autoincrement())
   workerId  Int
-  orderId   Int
-  action    String
+  roleId    Int?
+  batchId   Int?
+  quantity  Int      @default(1)
   timestamp DateTime @default(now())
-  order     Order    @relation(fields: [orderId], references: [id])
   worker    User     @relation(fields: [workerId], references: [id])
+  role      Role?    @relation(fields: [roleId], references: [id])
+  batch     Batch?   @relation(fields: [batchId], references: [id])
+  orderId   Int?
+  order     Order?   @relation(fields: [orderId], references: [id])
 }
