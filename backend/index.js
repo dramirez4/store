@@ -1,5 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const https = require('https');
+const fs = require('fs');
+const path = require('path');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -18,6 +21,7 @@ const qrRoutes = require('./routes/qr');
 const app = express();
 const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
+const HTTPS_PORT = process.env.HTTPS_PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // Middleware
@@ -55,10 +59,28 @@ app.get('/', (req, res) => {
 
 // Start server only if run directly
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`API Documentation available at: http://localhost:${PORT}/api-docs`);
-  });
+  // Check if SSL certificates exist
+  const certPath = path.join(__dirname, 'cert.pem');
+  const keyPath = path.join(__dirname, 'key.pem');
+  
+  if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+    // Start HTTPS server
+    const httpsOptions = {
+      cert: fs.readFileSync(certPath),
+      key: fs.readFileSync(keyPath)
+    };
+    
+    https.createServer(httpsOptions, app).listen(HTTPS_PORT, () => {
+      console.log(`HTTPS Server running on port ${HTTPS_PORT}`);
+      console.log(`API Documentation available at: https://localhost:${HTTPS_PORT}/api-docs`);
+    });
+  } else {
+    // Fallback to HTTP only
+    app.listen(PORT, () => {
+      console.log(`HTTP Server running on port ${PORT}`);
+      console.log(`API Documentation available at: http://localhost:${PORT}/api-docs`);
+    });
+  }
 }
 
 module.exports = app;

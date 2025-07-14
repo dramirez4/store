@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import PWAInstall from './components/PWAInstall';
+import { getApiUrl, API_ENDPOINTS } from './utils/apiConfig';
 // import { t } from './i18n';
 
-const API_URL = 'http://localhost:3001/api/auth/login';
+const API_URL = getApiUrl(API_ENDPOINTS.AUTH.LOGIN);
 
 export default function LoginPage({ onLogin, lang, setLang }) {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -78,6 +80,9 @@ export default function LoginPage({ onLogin, lang, setLang }) {
           {loading ? (lang === 'en' ? 'Logging in...' : 'Iniciando...') : (lang === 'en' ? 'Login' : 'Entrar')}
         </button>
       </form>
+      
+      {/* PWA Install Prompt */}
+      <PWAInstall lang={lang} />
     </div>
   );
 } 

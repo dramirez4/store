@@ -9,7 +9,25 @@ async function main() {
   const workerPassword = await bcrypt.hash('workerpass', saltRounds);
   const salesPassword = await bcrypt.hash('salespass', saltRounds);
 
-  // Create users
+  // Create roles
+  const adminRole = await prisma.role.upsert({
+    where: { name: 'admin' },
+    update: {},
+    create: { name: 'admin' },
+  });
+  const workerRole = await prisma.role.upsert({
+    where: { name: 'worker' },
+    update: {},
+    create: { name: 'worker' },
+  });
+  const salesRole = await prisma.role.upsert({
+    where: { name: 'sales' },
+    update: {},
+    create: { name: 'sales' },
+  });
+  console.log('Roles:', { adminRole, workerRole, salesRole });
+
+  // Create users with roleId
   const admin = await prisma.user.upsert({
     where: { email: 'admin@example.com' },
     update: {},
@@ -17,7 +35,7 @@ async function main() {
       name: 'Admin User',
       email: 'admin@example.com',
       password: adminPassword,
-      role: 'admin',
+      roleId: adminRole.id,
     },
   });
   const worker = await prisma.user.upsert({
@@ -27,7 +45,7 @@ async function main() {
       name: 'Worker User',
       email: 'worker@example.com',
       password: workerPassword,
-      role: 'worker',
+      roleId: workerRole.id,
     },
   });
   const sales = await prisma.user.upsert({
@@ -37,9 +55,10 @@ async function main() {
       name: 'Sales User',
       email: 'sales@example.com',
       password: salesPassword,
-      role: 'sales',
+      roleId: salesRole.id,
     },
   });
+  console.log('Users:', { admin, worker, sales });
 
   // Create inventory items
   let item1 = await prisma.inventoryItem.findFirst({ where: { name: 'Sneaker X' } });
@@ -64,6 +83,16 @@ async function main() {
       },
     });
   }
+  console.log('Inventory Items:', { item1, item2 });
+
+  // Create a batch
+  const batch = await prisma.batch.create({
+    data: {
+      type: 'sole',
+      createdAt: new Date(),
+    },
+  });
+  console.log('Batch:', batch);
 
   // Create an order
   const order = await prisma.order.create({
@@ -76,9 +105,10 @@ async function main() {
       createdAt: new Date(),
     },
   });
+  console.log('Order:', order);
 
   // Create a payment
-  await prisma.payment.create({
+  const payment = await prisma.payment.create({
     data: {
       order: { connect: { id: order.id } },
       amount: 120.0,
@@ -86,16 +116,20 @@ async function main() {
       createdAt: new Date(),
     },
   });
+  console.log('Payment:', payment);
 
-  // Create a worker log
-  await prisma.workerLog.create({
+  // Create a worker log (with roleId and batchId)
+  const workerLog = await prisma.workerLog.create({
     data: {
       worker: { connect: { id: worker.id } },
       order: { connect: { id: order.id } },
-      action: 'scanned',
+      role: { connect: { id: workerRole.id } },
+      batch: { connect: { id: batch.id } },
+      quantity: 10,
       timestamp: new Date(),
     },
   });
+  console.log('WorkerLog:', workerLog);
 
   console.log('Seed data created successfully!');
 }

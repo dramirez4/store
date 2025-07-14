@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>QR Code Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5;
+        }
+        .qr-container { 
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .qr-code { 
+            border: 2px solid #ddd; 
+            border-radius: 8px;
+            padding: 20px; 
+            margin: 15px 0; 
+            text-align: center;
+            background: white;
+        }
+        img { 
+            max-width: 300px; 
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+        .error {
+            color: #d32f2f;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #2e7d32;
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1976d2;
+        }
+        .test-scanner {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f0f8ff;
+            border-radius: 8px;
+        }
+        #scanner-container {
+            width: 100%;
+            max-width: 400px;
+            margin: 20px auto;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        #scanner-video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        .scanner-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200;
+            height: 200;
+            border: 2px solid #00ff00;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+        .lang-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #eee;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .lang-toggle:hover {
+            background: #ddd;
+        }
+    </style>
+</head>
+<body>
+    <button class="lang-toggle" onclick="toggleLanguage()" id="langToggle">Español</button>
+    
+    <h1 id="title">QR Code Test - Production Tracking</h1>
+    
+    <div class="qr-container">
+        <h2 id="batch2Title">Batch ID: 2 (Sole)</h2>
+        <div class="qr-code" id="qr-2">
+            <div class="loading" id="loading2">Loading QR code...</div>
+        </div>
+    </div>
+    
+    <div class="qr-container">
+        <h2 id="batch3Title">Batch ID: 3 (Assembly)</h2>
+        <div class="qr-code" id="qr-3">
+            <div class="loading" id="loading3">Loading QR code...</div>
+        </div>
+    </div>
+
+    <div class="qr-container">
+        <h2 id="instructionsTitle">Testing Instructions:</h2>
+        <ol id="instructionsList">
+            <li id="instruction1">Open this page on your laptop at: <strong>https://192.168.1.113:3000/test-qr.html</strong></li>
+            <li id="instruction2">Use your iPhone to scan the QR codes above</li>
+            <li id="instruction3">Or use your laptop camera to scan the QR codes</li>
+            <li id="instruction4">Verify that the scanned data matches the expected batch IDs</li>
+            <li id="instruction5">Test the QR scanner in the Worker Dashboard</li>
+        </ol>
+        
+        <div class="success">
+            <strong id="expectedResults">Expected Results:</strong><br>
+            <span id="batch2Expected">• Batch 2 should scan as: {"batchId":2}</span><br>
+            <span id="batch3Expected">• Batch 3 should scan as: {"batchId":3}</span>
+        </div>
+    </div>
+
+    <div class="qr-container">
+        <h2 id="manualTitle">Manual Testing</h2>
+        <button onclick="loadQRCode(2)">Reload Batch 2 QR</button>
+        <button onclick="loadQRCode(3)">Reload Batch 3 QR</button>
+        <button onclick="loadAllQRCodes()">Reload All QR Codes</button>
+    </div>
+
+    <div class="qr-container test-scanner">
+        <h2 id="testScannerTitle">Test QR Scanner</h2>
+        <p id="testScannerDesc">Test the scanner directly on this page:</p>
+        <button onclick="startTestScanner()">Start Test Scanner</button>
+        <button onclick="stopTestScanner()">Stop Test Scanner</button>
+        
+        <div id="scanner-container" style="display: none;">
+            <video id="scanner-video" autoplay playsinline muted></video>
+            <div class="scanner-overlay"></div>
+        </div>
+        
+        <div id="scanner-result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://192.168.1.113:3001/api';
+        let testStream = null;
+        let currentLang = 'en';
+        
+        const translations = {
+            en: {
+                title: 'QR Code Test - Production Tracking',
+                batch2Title: 'Batch ID: 2 (Sole)',
+                batch3Title: 'Batch ID: 3 (Assembly)',
+                loading: 'Loading QR code...',
+                instructionsTitle: 'Testing Instructions:',
+                instruction1: 'Open this page on your laptop at: https://192.168.1.113:3000/test-qr.html',
+                instruction2: 'Use your iPhone to scan the QR codes above',
+                instruction3: 'Or use your laptop camera to scan the QR codes',
+                instruction4: 'Verify that the scanned data matches the expected batch IDs',
+                instruction5: 'Test the QR scanner in the Worker Dashboard',
+                expectedResults: 'Expected Results:',
+                batch2Expected: '• Batch 2 should scan as: {"batchId":2}',
+                batch3Expected: '• Batch 3 should scan as: {"batchId":3}',
+                manualTitle: 'Manual Testing',
+                testScannerTitle: 'Test QR Scanner',
+                testScannerDesc: 'Test the scanner directly on this page:',
+                scannerStarted: 'Scanner started - point camera at QR codes',
+                scannerStopped: 'Scanner stopped',
+                scannerError: 'Scanner error: ',
+                langToggle: 'Español'
+            },
+            es: {
+                title: 'Prueba de Código QR - Seguimiento de Producción',
+                batch2Title: 'Lote ID: 2 (Suela)',
+                batch3Title: 'Lote ID: 3 (Armado)',
+                loading: 'Cargando código QR...',
+                instructionsTitle: 'Instrucciones de Prueba:',
+                instruction1: 'Abra esta página en su computadora en: https://192.168.1.113:3000/test-qr.html',
+                instruction2: 'Use su iPhone para escanear los códigos QR de arriba',
+                instruction3: 'O use la cámara de su computadora para escanear los códigos QR',
+                instruction4: 'Verifique que los datos escaneados coincidan con los IDs de lote esperados',
+                instruction5: 'Pruebe el escáner QR en el Panel de Trabajador',
+                expectedResults: 'Resultados Esperados:',
+                batch2Expected: '• Lote 2 debe escanear como: {"batchId":2}',
+                batch3Expected: '• Lote 3 debe escanear como: {"batchId":3}',
+                manualTitle: 'Prueba Manual',
+                testScannerTitle: 'Probar Escáner QR',
+                testScannerDesc: 'Pruebe el escáner directamente en esta página:',
+                scannerStarted: 'Escáner iniciado - apunte la cámara a códigos QR',
+                scannerStopped: 'Escáner detenido',
+                scannerError: 'Error del escáner: ',
+                langToggle: 'English'
+            }
+        };
+        
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'es' : 'en';
+            updateLanguage();
+        }
+        
+        function updateLanguage() {
+            const t = translations[currentLang];
+            
+            // Update all text elements
+            document.getElementById('title').textContent = t.title;
+            document.getElementById('batch2Title').textContent = t.batch2Title;
+            document.getElementById('batch3Title').textContent = t.batch3Title;
+            document.getElementById('loading2').textContent = t.loading;
+            document.getElementById('loading3').textContent = t.loading;
+            document.getElementById('instructionsTitle').textContent = t.instructionsTitle;
+            document.getElementById('instruction1').innerHTML = t.instruction1;
+            document.getElementById('instruction2').textContent = t.instruction2;
+            document.getElementById('instruction3').textContent = t.instruction3;
+            document.getElementById('instruction4').textContent = t.instruction4;
+            document.getElementById('instruction5').textContent = t.instruction5;
+            document.getElementById('expectedResults').textContent = t.expectedResults;
+            document.getElementById('batch2Expected').textContent = t.batch2Expected;
+            document.getElementById('batch3Expected').textContent = t.batch3Expected;
+            document.getElementById('manualTitle').textContent = t.manualTitle;
+            document.getElementById('testScannerTitle').textContent = t.testScannerTitle;
+            document.getElementById('testScannerDesc').textContent = t.testScannerDesc;
+            document.getElementById('langToggle').textContent = t.langToggle;
+        }
+        
+        async function loadQRCode(batchId) {
+            const container = document.getElementById(`qr-${batchId}`);
+            const loadingEl = document.getElementById(`loading${batchId}`);
+            loadingEl.textContent = translations[currentLang].loading;
+            
+            try {
+                const response = await fetch(`${API_BASE}/qr/${batchId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                container.innerHTML = `
+                    <img src="${data.qr}" alt="QR Code Batch ${batchId}" />
+                    <p><strong>Data:</strong> {"batchId":${batchId}}</p>
+                    <div class="success">✓ QR code loaded successfully</div>
+                `;
+            } catch (error) {
+                console.error('Error loading QR code:', error);
+                container.innerHTML = `
+                    <div class="error">
+                        Error loading QR code: ${error.message}<br>
+                        <small>Make sure the backend is running on https://192.168.1.113:3001</small>
+                    </div>
+                `;
+            }
+        }
+        
+        function loadAllQRCodes() {
+            loadQRCode(2);
+            loadQRCode(3);
+        }
+        
+        async function startTestScanner() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 }
+                    }
+                });
+                
+                const video = document.getElementById('scanner-video');
+                video.srcObject = stream;
+                testStream = stream;
+                
+                document.getElementById('scanner-container').style.display = 'block';
+                document.getElementById('scanner-result').innerHTML = `<div class="success">${translations[currentLang].scannerStarted}</div>`;
+                
+            } catch (error) {
+                console.error('Scanner error:', error);
+                document.getElementById('scanner-result').innerHTML = `
+                    <div class="error">${translations[currentLang].scannerError}${error.message}</div>
+                `;
+            }
+        }
+        
+        function stopTestScanner() {
+            if (testStream) {
+                testStream.getTracks().forEach(track => track.stop());
+                testStream = null;
+            }
+            
+            const video = document.getElementById('scanner-video');
+            video.srcObject = null;
+            
+            document.getElementById('scanner-container').style.display = 'none';
+            document.getElementById('scanner-result').innerHTML = `<div class="success">${translations[currentLang].scannerStopped}</div>`;
+        }
+        
+        // Load QR codes when page loads
+        window.addEventListener('load', () => {
+            updateLanguage();
+            loadAllQRCodes();
+        });
+    </script>
+</body>
+</html> 

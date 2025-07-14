@@ -65,6 +65,34 @@ const translations = {
     en: 'Low Stock!',
     es: '¡Inventario Bajo!',
   },
+  add: {
+    en: 'Add',
+    es: 'Agregar',
+  },
+  allFieldsRequired: {
+    en: 'All fields are required.',
+    es: 'Todos los campos son obligatorios.'
+  },
+  stockMustBeNonNegative: {
+    en: 'Stock must be a non-negative number.',
+    es: 'Inventario debe ser un número no negativo.'
+  },
+  errorAddingItem: {
+    en: 'Error adding item.',
+    es: 'Error al agregar el artículo.'
+  },
+  errorUpdatingItem: {
+    en: 'Error updating item.',
+    es: 'Error al actualizar el artículo.'
+  },
+  networkError: {
+    en: 'Network error.',
+    es: 'Error de red.'
+  },
+  errorDeletingItem: {
+    en: 'Error deleting item.',
+    es: 'Error al eliminar el artículo.'
+  },
 };
 
 export function t(key, lang = 'en') {

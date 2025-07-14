@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { t } from './i18n';
 import './App.css';
+import { getApiUrl, API_ENDPOINTS } from './utils/apiConfig';
 
-const API_URL = 'http://localhost:3001/api/inventory';
+const API_URL = getApiUrl(API_ENDPOINTS.INVENTORY);
 
 const getAuthHeaders = () => ({
   'Content-Type': 'application/json',
@@ -20,11 +21,11 @@ function AddItemModal({ open, onClose, onAdd, lang }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.model || !form.size || form.stockLevel === '') {
-      setError(lang === 'en' ? 'All fields are required.' : 'Todos los campos son obligatorios.');
+      setError(t('allFieldsRequired', lang));
       return;
     }
     if (isNaN(Number(form.stockLevel)) || Number(form.stockLevel) < 0) {
-      setError(lang === 'en' ? 'Stock must be a non-negative number.' : 'Inventario debe ser un número no negativo.');
+      setError(t('stockMustBeNonNegative', lang));
       return;
     }
     try {
@@ -40,13 +41,13 @@ function AddItemModal({ open, onClose, onAdd, lang }) {
       });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || (lang === 'en' ? 'Error adding item.' : 'Error al agregar el artículo.'));
+        setError(data.error || t('errorAddingItem', lang));
         return;
       }
       onAdd();
       onClose();
     } catch (err) {
-      setError(lang === 'en' ? 'Network error.' : 'Error de red.');
+      setError(t('networkError', lang));
     }
   };
 
@@ -87,11 +88,11 @@ function EditItemModal({ open, onClose, onEdit, lang, item }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.model || !form.size || form.stockLevel === '') {
-      setError(lang === 'en' ? 'All fields are required.' : 'Todos los campos son obligatorios.');
+      setError(t('allFieldsRequired', lang));
       return;
     }
     if (isNaN(Number(form.stockLevel)) || Number(form.stockLevel) < 0) {
-      setError(lang === 'en' ? 'Stock must be a non-negative number.' : 'Inventario debe ser un número no negativo.');
+      setError(t('stockMustBeNonNegative', lang));
       return;
     }
     try {
@@ -107,13 +108,13 @@ function EditItemModal({ open, onClose, onEdit, lang, item }) {
       });
       if (!res.ok) {
         const data = await res.json();
-        setError(data.error || (lang === 'en' ? 'Error updating item.' : 'Error al actualizar el artículo.'));
+        setError(data.error || t('errorUpdatingItem', lang));
         return;
       }
       onEdit();
       onClose();
     } catch (err) {
-      setError(lang === 'en' ? 'Network error.' : 'Error de red.');
+      setError(t('networkError', lang));
     }
   };
 

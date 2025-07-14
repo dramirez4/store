@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { t } from './i18n';
+import { getApiUrl, API_ENDPOINTS } from './utils/apiConfig';
 
-const API_URL = 'http://localhost:3001/api/sales';
+const API_URL = getApiUrl(API_ENDPOINTS.SALES);
 
 const getAuthHeaders = () => ({
   'Content-Type': 'application/json',
@@ -90,7 +91,7 @@ export default function OrderPage({ lang, setLang }) {
       });
   };
   const fetchInventory = () => {
-    fetch('http://localhost:3001/api/inventory', { headers: getAuthHeaders() })
+    fetch(getApiUrl(API_ENDPOINTS.INVENTORY), { headers: getAuthHeaders() })
       .then((res) => res.json())
       .then((data) => setInventory(data.inventory || []));
   };

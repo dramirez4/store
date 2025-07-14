@@ -17,6 +17,7 @@ services:
     build: ./backend
     environment:
       DATABASE_URL: "postgres://postgres:postgres@postgres:5432/shoeco"
+      HTTPS_PORT: 3001
     ports:
       - "3001:3001"
       - "5555:5555"
@@ -24,6 +25,8 @@ services:
       - postgres
     volumes:
       - ./backend:/app
+      - ./cert.pem:/app/cert.pem
+      - ./key.pem:/app/key.pem
     command: npm start
 
   frontend:

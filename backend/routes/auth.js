@@ -180,13 +180,14 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    // Find user
+    // Find user and include role relation
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
+      include: { role: true }
     });
 
-    if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user || !user.role) {
+      return res.status(401).json({ error: 'Invalid credentials or user has no role assigned' });
     }
 
     // Check password
@@ -195,21 +196,20 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Generate JWT token
+    // Generate JWT token with role name
     const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role },
+      { userId: user.id, email: user.email, role: user.role.name },
       JWT_SECRET,
-      { expiresIn: '24h' }
+      { expiresIn: '8h' }
     );
 
-    // Return user data (without password) and token
+    // Return user data (without password) and token, include role name
     const { password: _, ...userWithoutPassword } = user;
-    res.json({
+    res.status(200).json({
       message: 'Login successful',
-      user: userWithoutPassword,
+      user: { ...userWithoutPassword, role: user.role.name },
       token
     });
-
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Internal server error' });
